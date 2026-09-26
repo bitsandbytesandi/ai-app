@@ -1,8 +1,33 @@
+# environment & secrets
+.env
+.env.*
+*.env
 server/.env
+
+# python
 __pycache__/
-*.pyc
-node_modules/
-dist/
-.DS_Store
+*.py[cod]
+*$py.class
+*.so
+.Python
 server/venv/
 venv/
+ENV/
+env/
+.venv/
+  
+# IDE / OS 
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node
+node_modules/
+dist/
+build/
+
+# logs & temporary
+*.log
+.cache/
