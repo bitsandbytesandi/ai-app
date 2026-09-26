@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>AI App</h1>
+      <p class="subtitle">Fast • Free models • Auto-fallback</p>
+    </header>
+
+    <main>
+      <div class="input-area">
+        <textarea id="prompt" placeholder="Ask me anything..." rows="3"></textarea>
+        <button id="send">
+          <span class="btn-text">Generate</span>
+          <span class="loader" hidden></span>
+        </button>
+      </div>
+
+      <div id="history" class="history"></div>
+    </main>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
