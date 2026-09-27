@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from routes.generate import router as generate_router
+from auth import get_current_user, get_supabase_admin
 import os
 
 load_dotenv()

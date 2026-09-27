@@ -5,24 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI App</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
   <div class="app">
     <header>
       <h1>AI App</h1>
       <p class="subtitle">Fast • Free models • Auto-fallback</p>
+      <div id="auth-area"></div>
     </header>
 
     <main>
-      <div class="input-area">
-        <textarea id="prompt" placeholder="Ask me anything..." rows="3"></textarea>
-        <button id="send">
-          <span class="btn-text">Generate</span>
-          <span class="loader" hidden></span>
-        </button>
-      </div>
+      <!-- Login form -->
+      <div id="login-section" class="input-area" style="display:none;">
+        <input type="email" id="email" placeholder="Email" />
+        <input type="password" id="password" placeholder="Password" />
+        <div style="display:flex; gap:10px;">
+          <button id="login-btn">Login</button>
+          <button id="signup-btn">Sign up</button>
+        </div>
+  
+        <p id="auth-error" class="error-text" style="color:#ef4444; margin-top:12px; font-size:0.9rem;"></p>
 
-      <div id="history" class="history"></div>
+      <!-- Chat UI -->
+      <div id="chat-section" style="display:none;">
+  <div class="input-area">
+    <textarea id="prompt" placeholder="Ask me anything..." rows="3"></textarea>
+    <button id="send">
+      <span class="btn-text">Generate</span>
+      <span class="loader" hidden></span>
+    </button>
+  </div>
+  <div id="history" class="history"></div>
+</div>
     </main>
   </div>
 

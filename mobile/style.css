@@ -106,3 +106,22 @@ button:disabled { opacity: 0.65; cursor: not-allowed; }
 .question { color: #93c5fd; margin-bottom: 12px; }
 .answer { color: #e5e5e5; }
 .error-text { color: var(--error); }
+
+textarea:disabled,
+button:disabled {
+  opacity: 0.6;
+}
+
+#live-answer::after {
+  content: "▍";
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.history {
+  max-height: 60vh;
+  overflow-y: auto;
+}
