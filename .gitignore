@@ -1,6 +1,5 @@
 # environment & secrets
 .env
-.env.*
 *.env
 server/.env
 
