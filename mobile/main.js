@@ -174,9 +174,29 @@ sendBtn.addEventListener("click", async () => {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${currentSession.access_token}`,
       },
-      body: JSON.stringify({ prompt }),
+const history = [];
+document.querySelectorAll("#history .message").forEach(msg => {
+    const question = msg.querySelector(".question")?.textContent;
+    const answer = msg.querySelector(".answer")?.textContent;
+    if (question) history.push({ role: "user", content: question });
+    if (answer && !answer.includes("Stream failed") && !answer.includes("error")) {
+        history.push({ role: "assistant", content: answer });
+    }
     });
 
+history.reverse();
+
+const res = await fetch("/api/generate/stream", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${currentSession.acces_token}`,
+  },
+  body: JSON.stringify({
+    prompt,
+    history: history.slice(-10)
+  }),
+});
     if (!res.ok || !res.body) {
       const err = await res.json().catch(() => ({ detail: "Stream failed" }));
       throw new Error(err.detail || "Stream failed");

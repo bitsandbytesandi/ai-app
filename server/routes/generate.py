@@ -20,8 +20,10 @@ router = APIRouter()
 
 class GenerateRequest(BaseModel):
     prompt: str
+    history: list[dict] = []
 
-RATE_LIMIT = 20
+
+RATE_LIMIT = 30
 RATE_WINDOW = 60
 request_log = defaultdict(list)
 
@@ -33,6 +35,7 @@ FREE_MODELS = [
     "google/gemma-4-26b-a4b-it:free",
 ]
 
+
 def is_rate_limited(key: str) -> bool:
     now = time.time()
     request_log[key] = [t for t in request_log[key] if now - t < RATE_WINDOW]
@@ -41,11 +44,25 @@ def is_rate_limited(key: str) -> bool:
     request_log[key].append(now)
     return False
 
+
+def build_messages(req: GenerateRequest) -> list[dict]:
+    """Bouwt de conversation context op."""
+    messages = []
+    for msg in req.history[-8:]:
+        if msg.get("role") in ("user", "assistant") and msg.get("content"):
+            messages.append({
+                "role": msg["role"],
+                "content": msg["content"]
+            })
+    messages.append({"role": "user", "content": req.prompt})
+    return messages
+
+
 @router.post("/generate")
 async def generate(
     req: GenerateRequest,
     request: Request,
-    user = Depends(get_current_user)
+    user=Depends(get_current_user)
 ):
     client_ip = request.client.host
     user_id = user.id
@@ -59,6 +76,7 @@ async def generate(
     if not api_key:
         raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY not set")
 
+    messages = build_messages(req)
     last_error = None
     used_model = None
     text = None
@@ -77,7 +95,7 @@ async def generate(
                     },
                     json={
                         "model": model,
-                        "messages": [{"role": "user", "content": req.prompt}],
+                        "messages": messages,
                     },
                 )
 
@@ -121,7 +139,7 @@ async def generate(
 
 
 @router.get("/conversations")
-async def get_conversations(user = Depends(get_current_user)):
+async def get_conversations(user=Depends(get_current_user)):
     supabase = get_supabase_admin()
     result = (
         supabase.table("conversations")
@@ -132,6 +150,7 @@ async def get_conversations(user = Depends(get_current_user)):
         .execute()
     )
     return result.data
+
 
 @router.post("/generate/stream")
 async def generate_stream(
@@ -149,6 +168,8 @@ async def generate_stream(
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY not set")
+
+    messages = build_messages(req)
 
     async def event_generator():
         collected = []
@@ -170,12 +191,13 @@ async def generate_stream(
                         },
                         json={
                             "model": model,
-                            "messages": [{"role": "user", "content": req.prompt}],
+                            "messages": messages,
                             "stream": True,
                         },
                     ) as response:
                         if response.status_code != 200:
                             last_error = await response.aread()
+                            logger.warning(f"Model {model} failed with status {response.status_code}")
                             continue
 
                         yield f"data: {json.dumps({'type': 'meta', 'model': model})}\n\n"
@@ -197,7 +219,7 @@ async def generate_stream(
                                 except Exception:
                                     continue
 
-                # model werkte → klaar
+                # Model werkte → opslaan en klaar
                 full_text = "".join(collected)
                 if full_text:
                     try:
@@ -216,6 +238,7 @@ async def generate_stream(
 
             except Exception as e:
                 last_error = str(e)
+                logger.warning(f"Model {model} exception: {e}")
                 collected = []
                 continue
 
